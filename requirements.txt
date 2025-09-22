@@ -1,0 +1,12 @@
+pandas==2.3.2
+python-dotenv==1.1.1
+Requests==2.32.5
+
+--extra-index-url http://packages.radioanalyzerserver.dk/simple
+--trusted-host packages.radioanalyzerserver.dk
+ra_autorun==2.0.6
+ra_data_helper==4.0.15
+ra_datetime_helper==2.2.6
+ra_instance_spinner==2.0.11
+ra_mysql_package==4.0.8
+ra_service_helper==4.0.43
