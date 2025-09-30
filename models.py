@@ -2,7 +2,7 @@ from dataclasses import dataclass, asdict
 from datetime import datetime
 from enum import Enum
 
-from queries import get_report_details
+from queries import get_report_details, get_radio_names
 
 
 class MarketType(Enum):
@@ -28,6 +28,7 @@ class Job:
     start_dt: str = None
     end_dt: str = None
     end_dt_date: datetime = None
+    radio_names: dict = None
 
 
     def __post_init__(self):
@@ -45,6 +46,7 @@ class Job:
                 self.daypart_id = int(report['daypart_id'])
                 self.hide_invalid = bool(report['hide_invalid']) if report['hide_invalid'] != None else True
                 self.hide_deltas = bool(report['hide_deltas']) if report['hide_deltas'] != None else True
+                self.radio_names = get_radio_names(self.radio_ids)
 
 
 

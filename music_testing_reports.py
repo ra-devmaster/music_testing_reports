@@ -21,7 +21,8 @@ def init_job(instance: BackendService, job: dict):
     except Exception as ex:
         ex.add_note(f"Failed to create Job from dict, {ex}")
         raise
-    job_name = f"Generating report[{job.report_id}] for user [{job.user_id}] for radios {job.radio_ids}"
+    radio_names = ' '.join(f'{v}[{k}]' for k, v in job.radio_names.items())
+    job_name = f"Generating report[{job.report_id}] for user [{job.user_id}] for radios {radio_names}"
     instance.set_job_name(job_name)
     instance.update_job_action('Starting')
     instance.check_stop_processing()
@@ -36,7 +37,6 @@ def process_job(instance: BackendService, job: Job):
     job.end_dt_date = end_of_the_week(dt_now - timedelta(days=7))
     job.end_dt = job.end_dt_date.strftime('%Y-%m-%d')
 
-    radio_names = get_radio_names(job.radio_ids)
     instance.log_activity('Getting song list')
     songs = get_song_list(job)['data']
     if job.hide_invalid:
@@ -66,7 +66,7 @@ def process_job(instance: BackendService, job: Job):
             report_data.append(data)
             sort_column = "Spins"
     else:
-        score_columns = [f'{v} Score' for k, v in radio_names.items()]
+        score_columns = [f'{v} Score' for k, v in job.radio_names.items()]
         score_columns.append('Combined Score')
         for song in songs:
             data = {
@@ -78,15 +78,15 @@ def process_job(instance: BackendService, job: Job):
                 'Combined Burn': song['combined']['burn']
             }
             for r in job.radio_ids:
-                data[f'{radio_names[r]} Score'] = next((x['song_score'] for x in song['individual'] if x['radio_id'] == r), None)
+                data[f'{job.radio_names[r]} Score'] = next((x['song_score'] for x in song['individual'] if x['radio_id'] == r), None)
             report_data.append(data)
         sort_column = "Combined Spins"
 
     report_data = sorted(report_data, key=lambda d: d[sort_column], reverse=True)
     instance.log_activity('Generating attachments')
-    attachments = generate_attachments(report_data, job.start_dt, job.end_dt, score_columns, radio_names)
+    attachments = generate_attachments(report_data, job.start_dt, job.end_dt, score_columns, job.radio_names)
     instance.log_activity('Creating e-mail')
-    email = create_email(job, report_data, radio_names)
+    email = create_email(job, report_data, job.radio_names)
     instance.log_activity('Sending e-mail')
     email_sent = send_api(job.email_address, email['subject'], email['body'], attachments)
     instance.log_activity('Removing files')
