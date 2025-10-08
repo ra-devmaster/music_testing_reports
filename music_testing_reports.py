@@ -8,10 +8,10 @@ from queries import *
 
 load_dotenv()
 
-hardcoded_job = {'report_id': 1}
+# hardcoded_job = {'report_id': 13}
 
 # For production, uncomment line below
-# hardcoded_job = None
+hardcoded_job = None
 
 
 def init_job(instance: BackendService, job: dict):
@@ -39,6 +39,7 @@ def process_job(instance: BackendService, job: Job):
 
     instance.log_activity('Getting song list')
     songs = get_song_list(job)['data']
+
     if job.hide_invalid:
         songs = [s for s in songs if s['combined']['valid']]
 
@@ -46,6 +47,9 @@ def process_job(instance: BackendService, job: Job):
         songs = [s for s in songs if (job.max_spins >= s['combined']['spins'] >= job.min_spins)]
     else:
         songs = [s for s in songs if s['combined']['spins'] >= job.min_spins]
+    if not songs or len(songs) <= 0:
+        instance.log_activity('No songs found. Exiting...')
+        return True
     instance.log_activity('Formatting song data')
     report_data = []
     if len(job.radio_ids) == 1:

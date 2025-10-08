@@ -12,9 +12,9 @@ override_sql_settings({
 
 
 def run():
-    # if not autorun_enabled():
-    #     log.error("Autorun is disabled.")
-    #     return
+    if not autorun_enabled():
+        log.error("Autorun is disabled.")
+        return
     st_time = time.time()
 
     with SQLConnection(1) as conn1, SQLConnection(2) as conn2:
