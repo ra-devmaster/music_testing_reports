@@ -47,7 +47,7 @@ def get_report_details(report_id: int):
 def create_message_queue_entries(conn):
     from functions import get_demographic
     try:
-        q = ('SELECT report_id, radio_ids, demo_id FROM radioanalyzer.music_testing_reports AS mts JOIN radioanalyzer.users AS u USING(user_id) WHERE being_processed != -1 AND ('
+        q = ('SELECT report_id, radio_ids, demo_id FROM radioanalyzer.music_testing_reports AS mts JOIN radioanalyzer.users AS u USING(user_id) WHERE being_processed != 1 AND ('
              'DATE_ADD('
              'last_date_used, INTERVAL frequency WEEK) < '
              'NOW() OR last_date_used IS Null) AND is_disabled = 0')
