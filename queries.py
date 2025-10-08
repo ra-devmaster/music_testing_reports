@@ -56,13 +56,16 @@ def create_message_queue_entries(conn):
         end_dt = end_of_the_week(datetime.now() - timedelta(days=7)) - timedelta(hours=1)
         final_jobs = []
         for r in res:
-            demo = get_demographic(r['demo_id'])
-            latest_datas = []
-            for radio_id in r['radio_ids'].split(','):
-                # if radio does burn check that instead
-                latest_datas.append(get_latest_datetime(conn, radio_id, demo['data_type'], demo['listener_group']))
-            if not any(x < end_dt for x in latest_datas):
-                final_jobs.append({'report_id': r['report_id']})
+            try:
+                demo = get_demographic(r['demo_id'])
+                latest_datas = []
+                for radio_id in r['radio_ids'].split(','):
+                    # if radio does burn check that instead
+                    latest_datas.append(get_latest_datetime(conn, radio_id, demo['data_type'], demo['listener_group']))
+                if not any(x < end_dt for x in latest_datas):
+                    final_jobs.append({'report_id': r['report_id']})
+            except:
+                continue
         return final_jobs
     except Exception as e:
         raise Exception(f'Failed to create messages: {repr(e)}')
@@ -109,9 +112,10 @@ def get_latest_datetime(conn, radio_id, data_type, listener_group):
     with SQLConnection(2) as conn2:
         conn2.execute(q, (radio_id,))
         res=conn.fetchone(True)
-    if  not res or len(res)==0 or not res['enabled']:
-        module_to_check = 9
-    else:
-        module_to_check = 14
-    latest_data = get_latest_calculated_datetime(conn, module_to_check, radio_id, data_type, listener_group)
-    return latest_data
+    modules_to_check = [{'module_id': 9, 'listener_group': True}]
+    if res and res['enabled']:
+        modules_to_check.append({'module_id': 14, 'listener_group': False})
+    latest_data = []
+    for m in modules_to_check:
+        latest_data.append(get_latest_calculated_datetime(conn, m['module_id'], radio_id, data_type, m['listener_group']))
+    return min(latest_data)
