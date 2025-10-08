@@ -112,7 +112,7 @@ def get_latest_datetime(conn, radio_id, data_type, listener_group):
     with SQLConnection(2) as conn2:
         conn2.execute(q, (radio_id,))
         res=conn.fetchone(True)
-    modules_to_check = [{'module_id': 9, 'listener_group': True}]
+    modules_to_check = [{'module_id': 9, 'listener_group': listener_group > 0}]
     if res and res['enabled']:
         modules_to_check.append({'module_id': 14, 'listener_group': False})
     latest_data = []
