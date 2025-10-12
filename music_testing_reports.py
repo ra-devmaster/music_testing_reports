@@ -102,7 +102,7 @@ def process_job(instance: BackendService, job: Job):
 
 def on_success(instance: BackendService, job: Job):
     with SQLConnection(1) as conn:
-        set_reports_being_processed(conn, [job.report_id], 0, job.end_dt)
+        set_reports_being_processed(conn, [job.report_id], 0, job.end_dt_date)
 
 
 def on_fail(instance: BackendService, job: Job):
