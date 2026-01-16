@@ -22,7 +22,7 @@ def run():
         if len(jobs):
             report_ids = [x['report_id'] for x in jobs]
             set_reports_being_processed(conn1, report_ids, 1)
-            publish_and_create_autorun_jobs(jobs)
+        publish_and_create_autorun_jobs(jobs)
 
         log.info(f"Auto run completion time: {str(timedelta(seconds=round(time.time() - st_time)))}")
 
